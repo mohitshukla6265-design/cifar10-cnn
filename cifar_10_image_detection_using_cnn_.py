@@ -127,3 +127,41 @@ plt.imshow(sample_img)
 plt.title(f"True: {class_names[true_lbl]}\nPred: {class_names[pred_lbl]}")
 plt.axis('off')
 plt.show()
+
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+
+# getting predictions for the full test set
+print("Generating predictions on test set...")
+y_pred_probs = model.predict(X_test)
+y_pred       = np.argmax(y_pred_probs, axis=1)
+y_true       = y_test.flatten()  # flatten from (10000,1) to (10000,)
+
+# 1. overall metrics summary
+print("\n========== MODEL PERFORMANCE SUMMARY ==========")
+print(f"  Test Loss     : {test_loss:.4f}")
+print(f"  Test Accuracy : {test_acc * 100:.2f}%")
+print("================================================\n")
+
+# 2. per-class precision, recall and f1-score
+print("Per-Class Classification Report:")
+print(classification_report(y_true, y_pred, target_names=class_names))
+
+# 3. confusion matrix heatmap
+cm = confusion_matrix(y_true, y_pred)
+
+plt.figure(figsize=(10, 8))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+            xticklabels=class_names,
+            yticklabels=class_names)
+plt.title('Confusion Matrix')
+plt.ylabel('True Label')
+plt.xlabel('Predicted Label')
+plt.tight_layout()
+plt.show()
+
+# 4. per-class accuracy printed clearly
+print("\nPer-Class Accuracy:")
+for i, cls in enumerate(class_names):
+    class_acc = cm[i, i] / cm[i].sum() * 100
+    print(f"  {cls:<12}: {class_acc:.2f}%")
